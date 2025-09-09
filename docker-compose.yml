@@ -8,24 +8,86 @@ services:
       - /run/appgate:/run/appgate
     environment:
       - RUST_LOG=info
+    healthcheck:
+      test: ["CMD", "sh", "-lc", "curl -fsS http://127.0.0.1:9101/healthz >/dev/null"]
+      interval: 2s
+      timeout: 1s
+      retries: 60
+      start_period: 2s
 
   appgate-auth:
     build: { context: ., dockerfile: Dockerfile.auth }
     network_mode: host
-    depends_on: [appgate-ctrl]
+    depends_on:
+      appgate-ctrl:
+        condition: service_healthy
     volumes:
       - ./config:/etc/appgate:ro
       - /run/appgate:/run/appgate
     environment:
       - RUST_LOG=info
+    # If auth doesn't expose HTTP, check the UDS appears:
+    healthcheck:
+      test: ["CMD", "sh", "-lc", "test -S /run/appgate/pdp.sock"]
+      interval: 2s
+      timeout: 1s
+      retries: 60
+      start_period: 2s
+
+  # simple upstream so mod-http has something to proxy to
+  mock-upstream:
+    image: python:3.12-alpine
+    network_mode: host
+    command: sh -lc 'printf "hello-from-upstream\n" > /tmp/index.html && python -m http.server 3000 --bind 127.0.0.1 --directory /tmp'
+    healthcheck:
+      test: ["CMD", "sh", "-lc", "curl -fsS http://127.0.0.1:3000/ >/dev/null"]
+      interval: 2s
+      timeout: 1s
+      retries: 60
+      start_period: 2s
 
   appgate-mod-http:
     build: { context: ., dockerfile: Dockerfile.modhttp }
     network_mode: host
-    depends_on: [appgate-auth]
+    depends_on:
+      appgate-auth:
+        condition: service_healthy
+      mock-upstream:
+        condition: service_healthy
     volumes:
       - ./config:/etc/appgate:ro
       - /run/appgate:/run/appgate
     environment:
       - RUST_LOG=info
-      - APPGATE_UPSTREAM=http://localhost:3000
+      - APPGATE_UPSTREAM=http://127.0.0.1:3000
+    # If mod-http has a health endpoint, prefer that; else probe root
+    healthcheck:
+      test: ["CMD", "sh", "-lc", "curl -fsS http://127.0.0.1:8080/ >/dev/null"]
+      interval: 2s
+      timeout: 1s
+      retries: 60
+      start_period: 2s
+
+  # test runner
+  tests:
+    image: alpine:3.20
+    network_mode: host
+    depends_on:
+      appgate-ctrl:     { condition: service_healthy }
+      appgate-auth:     { condition: service_healthy }
+      appgate-mod-http: { condition: service_healthy }
+      mock-upstream:    { condition: service_healthy }
+    # curl + bash for test script
+    entrypoint: ["/bin/sh","-lc"]
+    command: >
+      'apk add --no-cache curl >/dev/null &&
+       echo "== wait for services ==" &&
+       for i in $(seq 1 60); do
+         curl -fsS http://127.0.0.1:9101/healthz >/dev/null && break || sleep 1;
+         [ $$i -eq 60 ] && { echo "health never ready"; exit 1; }
+       done &&
+       echo "== probe metrics ==" &&
+       curl -fsS http://127.0.0.1:9100/metrics | head -n 3 &&
+       echo "== probe proxy to upstream ==" &&
+       RESP=$$(curl -fsS http://127.0.0.1:8080/); echo "$$RESP" | grep -q "hello-from-upstream" &&
+       echo "ALL TESTS PASSED"'

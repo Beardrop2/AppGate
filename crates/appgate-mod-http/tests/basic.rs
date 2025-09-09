@@ -18,7 +18,10 @@ struct AllowAll;
 
 #[tonic::async_trait]
 impl Pdp for AllowAll {
-    async fn decide(&self, _req: TRequest<DecisionRequest>) -> Result<TResponse<DecisionResponse>, Status> {
+    async fn decide(
+        &self,
+        _req: TRequest<DecisionRequest>,
+    ) -> Result<TResponse<DecisionResponse>, Status> {
         let mut inject = HashMap::new();
         inject.insert("X-User-Sub".to_string(), "demo".to_string());
         Ok(TResponse::new(DecisionResponse {
@@ -59,7 +62,14 @@ async fn proxies_when_pdp_allows() {
     let http_bin = env!("CARGO_BIN_EXE_appgate-mod-http");
     // note: spawn instead of status() so we don't block; we'll kill it later
     let mut child = std::process::Command::new(http_bin)
-        .args(&["--bind", "127.0.0.1:38081", "--pdp-uds", uds, "--upstream", "http://127.0.0.1:38080"])
+        .args(&[
+            "--bind",
+            "127.0.0.1:38081",
+            "--pdp-uds",
+            uds,
+            "--upstream",
+            "http://127.0.0.1:38080",
+        ])
         .spawn()
         .expect("spawn http module");
 
@@ -73,7 +83,11 @@ async fn proxies_when_pdp_allows() {
         .body(hyper::Body::empty())
         .unwrap();
     let resp = client.request(req).await.expect("send request");
-    assert!(resp.status().is_success(), "unexpected status: {}", resp.status());
+    assert!(
+        resp.status().is_success(),
+        "unexpected status: {}",
+        resp.status()
+    );
     let bytes = hyper::body::to_bytes(resp.into_body()).await.unwrap();
     assert_eq!(&bytes[..], b"OK");
 

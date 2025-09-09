@@ -3,8 +3,8 @@ pub mod pdp {
 }
 
 use anyhow::Result;
-use tonic::transport::{Endpoint, Server};
 use tonic::transport::server::Router;
+use tonic::transport::{Endpoint, Server};
 use tower::service_fn;
 
 use std::{path::Path, sync::Arc};
@@ -12,8 +12,12 @@ use tokio::net::UnixListener;
 
 pub async fn uds_server<S>(svc: S, uds_path: &str) -> Result<()>
 where
-    S: tonic::codegen::Service<http::Request<hyper::body::Incoming>, Response=http::Response<tonic::body::BoxBody>>
-        + Clone + Send + 'static,
+    S: tonic::codegen::Service<
+            http::Request<hyper::body::Incoming>,
+            Response = http::Response<tonic::body::BoxBody>,
+        > + Clone
+        + Send
+        + 'static,
     S::Future: Send + 'static,
 {
     if Path::new(uds_path).exists() {
@@ -21,7 +25,10 @@ where
     }
     let uds = UnixListener::bind(uds_path)?;
     let incoming = tokio_stream::wrappers::UnixListenerStream::new(uds);
-    Server::builder().add_service(svc).serve_with_incoming(incoming).await?;
+    Server::builder()
+        .add_service(svc)
+        .serve_with_incoming(incoming)
+        .await?;
     Ok(())
 }
 

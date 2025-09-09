@@ -8,9 +8,9 @@ anyhow = { workspace = true }
 clap = { workspace = true }
 tokio = { workspace = true }
 tracing = { workspace = true }
-tracing-subscriber = { workspace = true }
+tracing-subscriber = { workspace = true,  version = "0.3", features = ["fmt", "json", "time"] }
 axum = { workspace = true }
-prometheus = { workspace = true }
+prometheus = { workspace = true, version = "0.13.4", default-features = false, features = ["gen", "process"] }
 serde = { workspace = true }
 serde_json = { workspace = true }
 toml = { workspace = true }

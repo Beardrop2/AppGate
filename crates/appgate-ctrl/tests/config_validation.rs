@@ -1,5 +1,5 @@
-use std::path::PathBuf;
 use appgate_ctrl::Config;
+use std::path::PathBuf;
 
 #[test]
 fn config_ok() {
