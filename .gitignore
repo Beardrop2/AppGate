@@ -1,0 +1,15 @@
+
+# Compiled files
+/target/
+
+# By default Cargo places binaries in target/debug and target/release
+# (covered by /target/, but useful to be explicit)
+/debug
+/release
+
+# Rust/Cargo specific
+**/*.rs.bk
+
+# Optional: if you use rustfmt or clippy caches
+/.cargo
+/.rustup
