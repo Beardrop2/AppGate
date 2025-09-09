@@ -1,0 +1,38 @@
+
+appgate/
+├─ Cargo.toml                # workspace
+├─ rust-toolchain.toml       # (optional) pin stable
+├─ Makefile
+├─ docker-compose.yml
+├─ config/
+│  ├─ appgate.toml
+│  ├─ policy/
+│  │  └─ foundry.toml
+│  └─ ca.pem 		     # Never include PKI in git projects.
+└─ crates/
+   ├─ appgate-ipc/           # shared proto/types + client/server helpers
+   │  ├─ Cargo.toml
+   │  ├─ build.rs
+   │  ├─ proto/pdp.proto
+   │  └─ src/lib.rs
+   ├─ appgate-policy/        # minimal policy engine v1 (TOML)
+   │  ├─ Cargo.toml
+   │  └─ src/lib.rs
+   ├─ appgate-ctrl/
+   │  ├─ Cargo.toml
+   │  └─ src/main.rs
+   ├─ appgate-auth/
+   │  ├─ Cargo.toml
+   │  └─ src/main.rs
+   ├─ appgate-mod-http/
+   │  ├─ Cargo.toml
+   │  └─ src/main.rs
+   ├─ appgate-mod-tcp/
+   │  ├─ Cargo.toml
+   │  └─ src/main.rs
+   ├─ appgate-mod-udp/
+   │  ├─ Cargo.toml
+   │  └─ src/main.rs
+   └─ appgate-mod-foundry/
+      ├─ Cargo.toml
+      └─ src/main.rs

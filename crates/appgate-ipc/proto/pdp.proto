@@ -1,0 +1,26 @@
+syntax = "proto3";
+package appgate.pdp;
+
+message Attributes {
+  map<string, string> kv = 1;
+}
+
+message DecisionRequest {
+  string session_token = 1;
+  string protocol = 2;   // "http" | "tcp" | "udp"
+  string resource = 3;   // URL, sni:host:port, or label
+  string peer = 4;       // ip:port
+  Attributes attributes = 5;
+}
+
+message DecisionResponse {
+  bool allow = 1;
+  string expiry = 2; // RFC3339
+  map<string,string> claims = 3;
+  map<string,string> inject = 4;
+  string reason = 5;
+}
+
+service PDP {
+  rpc Decide(DecisionRequest) returns (DecisionResponse);
+}

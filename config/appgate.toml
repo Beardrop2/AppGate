@@ -1,0 +1,18 @@
+[global]
+run_dir = "/run/appgate"
+log_level = "info"
+
+[certs]
+trust_store = "/etc/appgate/ca.pem"
+
+[auth.oidc]
+issuer = "https://keycloak/realms/main"
+client_id = "appgate"
+client_secret = "env:APPGATE_OIDC_SECRET"
+redirect_uri = "https://appgate.example.com/oidc/callback"
+cookie_name = "appg_sess"
+cookie_domain = "example.com"
+session_ttl_seconds = 3600
+
+[modules.http]
+listeners = [{ bind="0.0.0.0:8080", h3=false }]

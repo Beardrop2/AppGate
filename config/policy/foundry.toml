@@ -1,0 +1,14 @@
+[[rules]]
+name = "foundry-admin"
+protocol = "http"
+resource = "http://foundry/"
+require_groups = ["foundry-admin"]
+
+[rules.inject]
+"X-Role" = "admin"
+
+[[rules]]
+name = "foundry-players"
+protocol = "http"
+resource = "http://foundry/"
+require_groups = ["foundry-players"]

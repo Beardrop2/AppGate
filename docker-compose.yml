@@ -1,0 +1,31 @@
+version: "3.9"
+services:
+  appgate-ctrl:
+    build: { context: ., dockerfile: Dockerfile.ctrl }
+    network_mode: host
+    volumes:
+      - ./config:/etc/appgate:ro
+      - /run/appgate:/run/appgate
+    environment:
+      - RUST_LOG=info
+
+  appgate-auth:
+    build: { context: ., dockerfile: Dockerfile.auth }
+    network_mode: host
+    depends_on: [appgate-ctrl]
+    volumes:
+      - ./config:/etc/appgate:ro
+      - /run/appgate:/run/appgate
+    environment:
+      - RUST_LOG=info
+
+  appgate-mod-http:
+    build: { context: ., dockerfile: Dockerfile.modhttp }
+    network_mode: host
+    depends_on: [appgate-auth]
+    volumes:
+      - ./config:/etc/appgate:ro
+      - /run/appgate:/run/appgate
+    environment:
+      - RUST_LOG=info
+      - APPGATE_UPSTREAM=http://localhost:3000

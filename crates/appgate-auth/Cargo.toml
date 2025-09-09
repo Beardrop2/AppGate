@@ -1,0 +1,19 @@
+[package]
+name = "appgate-auth"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = { workspace = true }
+clap = { workspace = true }
+tokio = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+toml = { workspace = true }
+appgate-ipc = { path = "../appgate-ipc" }
+appgate-policy = { path = "../appgate-policy" }
+prost = { workspace = true }
+tonic = { workspace = true }
+chrono = { workspace = true }
