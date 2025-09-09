@@ -73,10 +73,8 @@ async fn handler(State(st): State<AppState>, mut req: Request<Body>) -> Result<R
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    tracing_subscriber::fmt()
-        .with_env_filter(EnvFilter::from_default_env())
-        .json()
-        .init();
+    // initialise structured JSON logger with RFC3339 timestamps
+    init_json_logger();
 
     let args = Args::parse();
     let chan = uds_channel(&args.pdp_uds).await?;
@@ -93,4 +91,17 @@ async fn main() -> Result<()> {
     tracing::info!("HTTP module on {}", addr);
     axum::Server::bind(&addr).serve(app.into_make_service()).await?;
     Ok(())
+}
+
+/// Initialise a JSON logger with RFC3339 timestamps
+fn init_json_logger() {
+    use tracing_subscriber::{fmt, EnvFilter};
+    let filter = EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("info"));
+    fmt()
+        .with_env_filter(filter)
+        .json()
+        .with_timer(tracing_subscriber::fmt::time::UtcTime::rfc_3339())
+        .with_current_span(true)
+        .with_span_list(true)
+        .init();
 }

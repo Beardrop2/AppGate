@@ -40,10 +40,8 @@ impl Pdp for PdpSvc {
 
 #[tokio::main]
 async fn main() -> Result<()> {
-    tracing_subscriber::fmt()
-        .with_env_filter(EnvFilter::from_default_env())
-        .json()
-        .init();
+    // initialise structured JSON logger with RFC3339 timestamps
+    init_json_logger();
 
     let args = Args::parse();
     let policy = Arc::new(appgate_policy::Policy::load(&args.policy)?);
@@ -52,4 +50,17 @@ async fn main() -> Result<()> {
     tracing::info!("PDP listening on {}", args.uds);
     uds_server(svc, &args.uds).await?;
     Ok(())
+}
+
+/// Initialise a JSON logger with RFC3339 timestamps
+fn init_json_logger() {
+    use tracing_subscriber::{fmt, EnvFilter};
+    let filter = EnvFilter::try_from_default_env().unwrap_or_else(|_| EnvFilter::new("info"));
+    fmt()
+        .with_env_filter(filter)
+        .json()
+        .with_timer(tracing_subscriber::fmt::time::UtcTime::rfc_3339())
+        .with_current_span(true)
+        .with_span_list(true)
+        .init();
 }

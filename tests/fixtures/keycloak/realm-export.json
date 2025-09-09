@@ -1,0 +1,23 @@
+{
+  "realm": "appgate-test",
+  "enabled": true,
+  "users": [
+    {
+      "username": "alice",
+      "enabled": true,
+      "emailVerified": true,
+      "credentials": [
+        { "type": "password", "value": "password", "temporary": false }
+      ],
+      "realmRoles": ["offline_access", "uma_authorization"]
+    }
+  ],
+  "clients": [
+    {
+      "clientId": "appgate",
+      "publicClient": false,
+      "secret": "secret-appgate",
+      "redirectUris": ["http://appgate.local/oidc/callback", "http://127.0.0.1:*/*"]
+    }
+  ]
+}
