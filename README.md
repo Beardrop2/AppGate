@@ -304,4 +304,3 @@ MIT (workspace-wide). See `Cargo.toml` and include a `LICENSE` file before publi
 * TCP/UDP/Foundry modules are stubs awaiting implementation.
 * Config, policy, metrics, and health endpoints are scaffolded.
 
-If you want this README auto-synced with code changes, say the word and I’ll add a `justfile`/CI job to verify examples build and commands succeed.
